@@ -1,0 +1,52 @@
+﻿<Page x:Class="PizzaOrder.Summary"
+      xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+      xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+      xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+      xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+      xmlns:local="clr-namespace:PizzaOrder"
+      mc:Ignorable="d" 
+      d:DesignHeight="450" d:DesignWidth="800"
+      Title="Summary">
+
+    <DockPanel>
+        <DockPanel.Background>
+            <ImageBrush ImageSource="pizza.jpg"/>
+        </DockPanel.Background>
+
+        <Label DockPanel.Dock="Top" Name="ChoosePizzaLabel"  
+               Content="PODSUMOWANIE"
+               VerticalAlignment="Center"
+               HorizontalAlignment="Center"
+               FontSize="24" FontFamily="Trebuchet MS"
+               Background="Black"
+               Foreground="Orange"
+               FontWeight="Bold"
+               Margin="0 0 0 10"/>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="9*"/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+
+            <Button Grid.Column="0" Grid.Row="0" Name="nextPizzaBtn" Background="Green" 
+                    BorderBrush="Black" BorderThickness="2" FontWeight="Bold"
+                    Click="OnClick_nextPizzaBtn" Margin="0 0 10 0">
+                Dodaj pizzę
+            </Button>
+            <Button Grid.Column="1" Grid.Row="0" Name="endOrderBtn" Background="Red" 
+                    BorderBrush="Black" BorderThickness="2" FontWeight="Bold"
+                    Click="OnClick_resetOrderBtn" Margin="10 0 0 0">
+                Resetuj zamówienie
+            </Button>
+
+            <ScrollViewer DockPanel.Dock="Bottom" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Margin="0 10 0 0">
+                <StackPanel Name="PanelSummary">
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </DockPanel>
+</Page>
