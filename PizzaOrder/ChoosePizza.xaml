@@ -6,7 +6,8 @@
       xmlns:local="clr-namespace:PizzaOrder"
       mc:Ignorable="d" 
       d:DesignHeight="500" d:DesignWidth="500"
-      Title="Pizza Order - Choose Pizza">
+      Title="Pizza Order - Choose Pizza"
+      KeepAlive="True">
 
     <Grid>
 

@@ -10,6 +10,8 @@ namespace PizzaOrder
     {
         public string Name { get; set; }
 
+        public string Tooltip { get; set; }
+
         public double Price { get; set; }
 
         public PizzaSize()
@@ -20,6 +22,13 @@ namespace PizzaOrder
         public PizzaSize(string name, double price)
         {
             this.Name = name;
+            this.Price = price;
+        }
+
+        public PizzaSize(string name, string tooltip, double price)
+        {
+            this.Name = name;
+            this.Tooltip = tooltip;
             this.Price = price;
         }
     }

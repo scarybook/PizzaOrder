@@ -32,14 +32,14 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Column="0" Grid.Row="0" Name="nextPizzaBtn" Background="Green" 
+            <Button Grid.Column="0" Grid.Row="0" Name="NextPizzaBtn" Background="Green" ToolTip="Dodaj"
                     BorderBrush="Black" BorderThickness="2" FontWeight="Bold"
-                    Click="OnClick_nextPizzaBtn" Margin="0 0 10 0">
+                    Click="NextPizzaBtn_Click" Margin="0 0 10 0">
                 Dodaj pizzę
             </Button>
-            <Button Grid.Column="1" Grid.Row="0" Name="endOrderBtn" Background="Red" 
+            <Button Grid.Column="1" Grid.Row="0" Name="ResetOrderBtn" Background="Red" ToolTip="Resetuj"
                     BorderBrush="Black" BorderThickness="2" FontWeight="Bold"
-                    Click="OnClick_resetOrderBtn" Margin="10 0 0 0">
+                    Click="ResetOrderBtn_Click" Margin="10 0 0 0">
                 Resetuj zamówienie
             </Button>
 
