@@ -133,7 +133,7 @@ namespace PizzaOrder
                 {
                     if (e.Result.Text == button.ToolTip.ToString())
                     {
-                        if (button.ToolTip.ToString() == "Dodaj pizzę")
+                        if (button.ToolTip.ToString() == "Dodaj")
                             NextPizzaBtn_Click(button, new RoutedEventArgs());
                         else if (button.ToolTip.ToString() == "Resetuj zamówienie")
                             ResetOrderBtn_Click(button, new RoutedEventArgs());

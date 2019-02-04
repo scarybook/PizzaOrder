@@ -171,9 +171,13 @@ namespace PizzaOrder
                     if (button.Content.ToString() == e.Result.Text)
                     {
                         if (button.IsChecked == true)
+                        {
                             Btn_Uncheck(button, new RoutedEventArgs());
+                        }
                         else
+                        {
                             Btn_Check(button, new RoutedEventArgs());
+                        }
 
                         break;
                     }
