@@ -31,7 +31,7 @@
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>
 
-            <Button Grid.Row="0" Name="BeginOrderButton" Background="Green" ToolTip="Rozpocznij"
+            <Button Grid.Row="0" Name="BeginOrderButton" Background="Green" ToolTip="Rozpocznij zamówienie"
                     BorderBrush="Black" BorderThickness="2" FontWeight="Bold"
                     Click="BeginOrderBtn_Click" >
                 Rozpocznij zamówienie

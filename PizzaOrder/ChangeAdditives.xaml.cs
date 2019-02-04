@@ -75,10 +75,11 @@ namespace PizzaOrder
                     Grid.SetRow(additiveButton, i);
                     GridAdditives.Children.Add(additiveButton);
 
+
                     count++;
                 }
             }
-
+            
             var additiveWordsList = new string[AdditiveList.Count+1];
 
             for (var index = 0; index < AdditiveList.Count; index++)
@@ -112,17 +113,16 @@ namespace PizzaOrder
 
         private void Btn_Check(object sender, RoutedEventArgs e)
         {
-            
             ToggleButton btn = (ToggleButton)sender;
             btn.IsChecked = true;
-            Console.WriteLine("You've checked " + btn.Content);
+            //Console.WriteLine("You've checked " + btn.Content);
         }
 
         private void Btn_Uncheck(object sender, RoutedEventArgs e)
         {
             ToggleButton btn = (ToggleButton)sender;
             btn.IsChecked = false;
-            Console.WriteLine("You've unchecked " + btn.Content);
+            //Console.WriteLine("You've unchecked " + btn.Content);
         }
 
         private void NextStepButton_Click(object sender, RoutedEventArgs e)
@@ -148,8 +148,12 @@ namespace PizzaOrder
             {
                 if (button.IsChecked == true)
                     button.IsChecked = false;
+
+                button.Checked -= Btn_Check;
+                button.Unchecked -= Btn_Check;
             }
 
+            
             Summary summaryPage = new Summary();
             NavigationService nav = NavigationService.GetNavigationService(this);
             nav.Navigate(summaryPage);
