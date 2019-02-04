@@ -1,4 +1,4 @@
-﻿<Page x:Class="PizzaOrder.ChooseSize"
+﻿<Page x:Class="PizzaOrder.ChangeAdditives"
       xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -6,7 +6,7 @@
       xmlns:local="clr-namespace:PizzaOrder"
       mc:Ignorable="d" 
       d:DesignHeight="800" d:DesignWidth="800"
-      Title="Pizza Order - Choose Size">
+      Title="ChangeAdditives">
 
     <Grid>
 
@@ -16,11 +16,12 @@
 
         <Grid.RowDefinitions>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="9*"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="8*"/>
         </Grid.RowDefinitions>
 
-        <Label Name="ChooseSizeLabel"  
-               Content="WYBIERZ ROZMIAR"
+        <Label Name="ChangeAdditivesLabel"  
+               Content="ZMIEŃ SKŁADNIKI"
                VerticalAlignment="Center"
                HorizontalAlignment="Center"
                FontSize="24" FontFamily="Trebuchet MS"
@@ -29,14 +30,22 @@
                FontWeight="Bold"
                Margin="0 10 0 10"/>
 
-        <Grid Grid.Row="1" Name="GridSize" Margin="0,0,0,0">
+        <Button Grid.Row="1" Name="NextStepButton" Background="Green" ToolTip="Rozpocznij"
+                BorderBrush="Black" BorderThickness="2" FontWeight="Bold" FontSize ="24" Margin="0 10 0 10"
+                Click="NextStepButton_Click" >
+            Dalej
+        </Button>
+
+        <Grid Grid.Row="2" Name="GridAdditives" Margin="0,0,0,0">
 
             <Grid.RowDefinitions>
+                <RowDefinition/>
                 <RowDefinition/>
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
             <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
                 <ColumnDefinition/>
                 <ColumnDefinition/>
             </Grid.ColumnDefinitions>

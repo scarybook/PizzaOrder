@@ -22,23 +22,27 @@ namespace PizzaOrder
     /// </summary>
     public partial class ChooseSize : Page
     {
+        private SpeechRecognitionEngine Sre;
 
-        public static readonly List<PizzaSize> SizeList = new List<PizzaSize>()
-        {
-            new PizzaSize("Mała", "(25 cm)", 15),
-            new PizzaSize("Średnia", "(32 cm)", 20),
-            new PizzaSize("Duża", "(40 cm)", 30),
-            new PizzaSize("Rodzinna", "(50 cm)", 40)
-        };
+        public static List<PizzaSize> SizeList;
 
         public static List<Button> SizeButtonsList = new List<Button>();
-
 
         public ChooseSize()
         {
             InitializeComponent();
-            int count = 0;
 
+            int count = 0;
+            
+            SizeList = new List<PizzaSize>()
+            {
+                new PizzaSize("Mała", "(25 cm)", 15),
+                new PizzaSize("Średnia", "(32 cm)", 20),
+                new PizzaSize("Duża", "(40 cm)", 30),
+                new PizzaSize("Rodzinna", "(50 cm)", 40)
+            };
+
+            Sre = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("pl-PL"));
 
             for (int i = 0; i < GridSize.RowDefinitions.Count; i++)
             {
@@ -63,29 +67,26 @@ namespace PizzaOrder
                 }
             }
 
-            var sizeWordsList = new string[SizeList.Count + 1];
+            var sizeWordsList = new string[SizeList.Count];
 
             for (var index = 0; index < SizeList.Count; index++)
             {
                 sizeWordsList[index] = SizeList.ElementAt(index).Name;
             }
 
-            sizeWordsList[SizeList.Count] = "Badziebadla";
-
             // MICROSOFT SPEECH PLATFORM
             try
             {
-                ChoosePizza.Sre.SetInputToDefaultAudioDevice();
-                ChoosePizza.Sre.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
-                ChoosePizza.Sre.RecognizeCompleted += new EventHandler<RecognizeCompletedEventArgs>(Sre_RecognizeCompleted);
+                Sre.SetInputToDefaultAudioDevice();
+                Sre.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
 
                 Choices words = new Choices(sizeWordsList);
                 GrammarBuilder gramBuild = new GrammarBuilder();
                 gramBuild.Append(words);
                 Grammar gramSre = new Grammar(gramBuild);
-               ChoosePizza.Sre.LoadGrammar(gramSre);
+                Sre.LoadGrammar(gramSre);
 
-                ChoosePizza.Sre.RecognizeAsync(RecognizeMode.Multiple);
+                Sre.RecognizeAsync(RecognizeMode.Multiple);
             }
             catch (Exception ex)
             {
@@ -93,33 +94,28 @@ namespace PizzaOrder
                 Console.ReadLine();
             }
             // MICROSOFT SPEECH PLATFORM
-
         }
 
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
+            Sre.RecognizeAsyncCancel();
+            Sre.UnloadAllGrammars();
+            Sre.SpeechRecognized -= new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
+
             Button btn = (Button)sender;
-            PizzaSize size = new PizzaSize();
-            size = (PizzaSize)btn.Tag;
+            PizzaSize size = (PizzaSize)btn.Tag;
+            
+            HomePage.OrderList.ElementAt(HomePage.OnTheList).PizzaSize = size;
 
-            ChoosePizza.OrderList.ElementAt(ChoosePizza.OnTheList).PizzaSize = size;
-
-            Summary summaryPage = new Summary();
+            ChangeAdditives changeAdditivesPage = new ChangeAdditives();
             NavigationService nav = NavigationService.GetNavigationService(this);
-            nav.Navigate(summaryPage);
+            nav.Navigate(changeAdditivesPage);
         }
 
         // MICROSOFT SPEECH PLATFORM
-        private static void Sre_SpeechRecognized(object sender,
-            SpeechRecognizedEventArgs e)
+        private void Sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Text == "Badziebadla")
-            {
-                ((SpeechRecognitionEngine)sender).RecognizeAsyncCancel();
-                Console.WriteLine("Badziebadla");
-                return;
-            }
-            if (e.Result.Confidence >= 0.75)
+            if (e.Result.Confidence >= 0.70)
             {
                 Console.WriteLine("I heard " + e.Result.Text);
 
@@ -127,19 +123,13 @@ namespace PizzaOrder
                 {
                     if (button.Content.ToString() == e.Result.Text)
                     {
-                        ((SpeechRecognitionEngine)sender).RecognizeAsyncCancel();
-                        button.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                        Btn_Click(button, new RoutedEventArgs());
+                        break;
                     }
                 }
             }
             else
-                Console.WriteLine("Unknown word, try again");
-        }
-
-        private static void Sre_RecognizeCompleted(object sender,
-            RecognizeCompletedEventArgs e)
-        {
-            return;
+                Console.WriteLine("Unknown word: " + e.Result.Text + ", Confidence: " + e.Result.Confidence);
         }
         // MICROSOFT SPEECH PLATFORM
     }

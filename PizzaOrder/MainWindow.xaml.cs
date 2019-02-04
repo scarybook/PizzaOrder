@@ -12,6 +12,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using Microsoft.Speech.Recognition;
+using Microsoft.Speech.Synthesis;
 
 namespace PizzaOrder
 {
@@ -20,6 +22,8 @@ namespace PizzaOrder
     /// </summary>
     public partial class MainWindow : NavigationWindow
     {
+        public static readonly SpeechSynthesizer Ss = new SpeechSynthesizer();
+
         public MainWindow()
         {
             InitializeComponent();

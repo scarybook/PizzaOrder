@@ -13,9 +13,12 @@ namespace PizzaOrder
         public PizzaSize PizzaSize { get; set; }
         public double TotalPrice { get; set; }
 
-        public Pizza()
+        public Pizza(Pizza bazowa)
         {
-                
+            this.Name = bazowa.Name;
+            this.AdditivesList = bazowa.AdditivesList;
+            this.PizzaSize = bazowa.PizzaSize;
+            this.TotalPrice = bazowa.TotalPrice;
         }
 
         public Pizza(string name, List<string> list)

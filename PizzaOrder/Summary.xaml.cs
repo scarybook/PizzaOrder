@@ -23,6 +23,8 @@ namespace PizzaOrder
     /// </summary>
     public partial class Summary : Page
     {
+        private SpeechRecognitionEngine Sre;
+
         public static List<Button> SummaryButtonsList = new List<Button>();
 
         public Summary()
@@ -30,31 +32,35 @@ namespace PizzaOrder
             InitializeComponent();
             double orderPrice = 0;
 
+            Sre = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("pl-PL"));
+
             SummaryButtonsList.Add(NextPizzaBtn);
             SummaryButtonsList.Add(ResetOrderBtn);
 
-            if (ChoosePizza.OrderList.Count > 0)
-            for (var i = 0; i <= ChoosePizza.OnTheList; i++)
+            if (HomePage.OrderList.Count > 0)
+            for (var i = 0; i <= HomePage.OnTheList; i++)
             {
-                ChoosePizza.OrderList.ElementAt(i).CalculatePrice();
+                HomePage.OrderList.ElementAt(i).CalculatePrice();
 
                 var sb = new StringBuilder( (i+1).ToString() )
-                    .Append(". ").Append(ChoosePizza.OrderList.ElementAt(i).Name)
-                    .Append(", ").Append(ChoosePizza.OrderList.ElementAt(i).PizzaSize.Name)
-                    .Append(", ").Append(ChoosePizza.OrderList.ElementAt(i).TotalPrice)
+                    .Append(". ").Append(HomePage.OrderList.ElementAt(i).Name)
+                    .Append(" - ").Append(HomePage.OrderList.ElementAt(i).PizzaSize.Name)
+                    .Append(" (").Append(string.Join(",", HomePage.OrderList.ElementAt(i).AdditivesList)).Append(")")
+                    .Append(" - ").Append(HomePage.OrderList.ElementAt(i).TotalPrice)
                     .Append(" zł");
 
-                    var summaryBox = new Label()
-                    {
-                        IsEnabled = false,
-                        Content = sb.ToString(),
-                        Name = "summaryBox" + i,
-                        Background = Brushes.LightGray
-                    };
+                var summaryBox = new Label()
+                {
+                    IsEnabled = false,
+                    Content = sb.ToString(),
+                    Name = "summaryBox" + i,
+                    Background = Brushes.LightGray
+                };
+                
+                
+                PanelSummary.Children.Add(summaryBox);
 
-                    PanelSummary.Children.Add(summaryBox);
-
-                orderPrice += ChoosePizza.OrderList.ElementAt(i).TotalPrice;
+                orderPrice += HomePage.OrderList.ElementAt(i).TotalPrice;
             }
 
             var orderPriceBox = new Label()
@@ -73,17 +79,15 @@ namespace PizzaOrder
             // MICROSOFT SPEECH PLATFORM
             try
             {
-                ChoosePizza.Sre.SetInputToDefaultAudioDevice();
-                ChoosePizza.Sre.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
-                ChoosePizza.Sre.RecognizeCompleted += new EventHandler<RecognizeCompletedEventArgs>(Sre_RecognizeCompleted);
+                Sre.SetInputToDefaultAudioDevice();
+                Sre.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
 
-                Choices words = new Choices(new string[] {NextPizzaBtn.ToolTip.ToString(), ResetOrderBtn.ToolTip.ToString(), "Badziebadla"});
+                Choices words = new Choices(new string[] {NextPizzaBtn.ToolTip.ToString(), ResetOrderBtn.ToolTip.ToString()});
                 GrammarBuilder gramBuild = new GrammarBuilder();
                 gramBuild.Append(words);
                 Grammar gramSre = new Grammar(gramBuild);
-                ChoosePizza.Sre.LoadGrammar(gramSre);
-
-                ChoosePizza.Sre.RecognizeAsync(RecognizeMode.Multiple);
+                Sre.LoadGrammar(gramSre);
+                Sre.RecognizeAsync(RecognizeMode.Multiple);
             }
             catch (Exception ex)
             {
@@ -97,7 +101,11 @@ namespace PizzaOrder
         private void NextPizzaBtn_Click(object sender, RoutedEventArgs e)
         {
 
-            if(ChoosePizza.OrderList.Count > 0) ChoosePizza.OnTheList++;
+            Sre.RecognizeAsyncCancel();
+            Sre.UnloadAllGrammars();
+            Sre.SpeechRecognized -= new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
+
+            if (HomePage.OrderList.Count > 0) HomePage.OnTheList++;
 
             ChoosePizza choosePizzaPage = new ChoosePizza();
             NavigationService nav = NavigationService.GetNavigationService(this);
@@ -106,8 +114,8 @@ namespace PizzaOrder
 
         private void ResetOrderBtn_Click(object sender, RoutedEventArgs e)
         {
-            ChoosePizza.OrderList.Clear();
-            ChoosePizza.OnTheList = 0;
+            HomePage.OrderList.Clear();
+            HomePage.OnTheList = 0;
 
             PanelSummary.Children.Clear();
             NavigationService nav = NavigationService.GetNavigationService(this);
@@ -115,37 +123,28 @@ namespace PizzaOrder
         }
 
         // MICROSOFT SPEECH PLATFORM
-        private static void Sre_SpeechRecognized(object sender,
-            SpeechRecognizedEventArgs e)
+        private void Sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Text == "Badziebadla")
-            {
-                ((SpeechRecognitionEngine)sender).RecognizeAsyncCancel();
-                Console.WriteLine("Badziebadla");
-                return;
-            }
-            if (e.Result.Confidence >= 0.75)
+            if (e.Result.Confidence >= 0.70)
             {
                 Console.WriteLine("I heard " + e.Result.Text);
 
                 foreach (Button button in SummaryButtonsList)
                 {
-                    if (button.ToolTip.ToString() == e.Result.Text)
+                    if (e.Result.Text == button.ToolTip.ToString())
                     {
-                        ((SpeechRecognitionEngine)sender).RecognizeAsyncCancel();
-                        button.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                        if (button.ToolTip.ToString() == "Dodaj")
+                            NextPizzaBtn_Click(button, new RoutedEventArgs());
+                        else if (button.ToolTip.ToString() == "Resetuj")
+                            ResetOrderBtn_Click(button, new RoutedEventArgs());
+
                         break;
                     }
+                    
                 }
             }
             else
-                Console.WriteLine("Unknown word, try again");
-        }
-
-        private static void Sre_RecognizeCompleted(object sender,
-            RecognizeCompletedEventArgs e)
-        {
-            return;
+                Console.WriteLine("Unknown word: " + e.Result.Text + ", Confidence: " + e.Result.Confidence);
         }
         // MICROSOFT SPEECH PLATFORM
 

@@ -5,5 +5,5 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:PizzaOrder"
         mc:Ignorable="d"
-        Title="Pizza Order" Height="500" Width="500" Source="ChoosePizza.xaml">
+        Title="Pizza Order" Height="800" Width="800" Source="HomePage.xaml">
 </NavigationWindow>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -26,28 +27,27 @@ namespace PizzaOrder
     /// </summary>
     public partial class ChoosePizza : Page
     {
+        private SpeechRecognitionEngine Sre;
 
-        public static readonly SpeechRecognitionEngine Sre = new SpeechRecognitionEngine( new System.Globalization.CultureInfo("pl-PL"));
-        public static readonly SpeechSynthesizer Ss = new SpeechSynthesizer();
-
-        public static readonly List<Pizza> PizzaList = new List<Pizza>()
-        {
-            new Pizza("Pepperoni", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "kiełbasa pepperoni" }),
-            new Pizza("Hawajska", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "szynka", "ananas" }),
-            new Pizza("Farmerska", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "zielona papryka", "pieczarki", "cebula" }),
-            new Pizza("Supreme", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "wołowina", "kiełbasa pepperoni", "zielona papryka", "pieczarki", "cebula" })
-        };
-
-        public static List<Pizza> OrderList = new List<Pizza>() { };
-
+        public static List<Pizza> PizzaList;
+        
         public static List<Button> PizzaButtonsList = new List<Button>();
-
-        public static int OnTheList = 0; //order position counter
 
         public ChoosePizza()
         {
             InitializeComponent();
-            var count = 0; 
+
+            var count = 0;
+
+            PizzaList = new List<Pizza>()
+            {
+                new Pizza("Pepperoni", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "kiełbasa pepperoni" }),
+                new Pizza("Hawajska", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "szynka", "ananas" }),
+                new Pizza("Farmerska", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "zielona papryka", "pieczarki", "cebula" }),
+                new Pizza("Supreme", new List<string>() { "ser mozzarella", "ziołowy sos pomidorowy", "wołowina", "kiełbasa pepperoni", "zielona papryka", "pieczarki", "cebula" })
+            };
+
+            Sre = new SpeechRecognitionEngine(new System.Globalization.CultureInfo("pl-PL"));
 
             for (var i = 0; i < GridPizza.RowDefinitions.Count; i++)
             {
@@ -58,37 +58,32 @@ namespace PizzaOrder
                         Tag = PizzaList.ElementAt(count),
                         Content = PizzaList.ElementAt(count).Name,
                         Margin = new Thickness(10, 10, 10, 10),
-                        ToolTip = String.Join(", ", PizzaList.ElementAt(count).AdditivesList)
+                        ToolTip = string.Join(", ", PizzaList.ElementAt(count).AdditivesList)
                     };
 
                     pizzaButton.Click += Btn_Click;
                     PizzaButtonsList.Add(pizzaButton);
-
+                    
                     Grid.SetColumn(pizzaButton, j);
                     Grid.SetRow(pizzaButton, i);
                     GridPizza.Children.Add(pizzaButton);
 
                     count++;
                 }
-
-               
             }
 
-            var pizzaWordsList = new string[PizzaList.Count + 1];
+            var pizzaWordsList = new string[PizzaList.Count];
 
             for (var index = 0; index < PizzaList.Count; index++)
             {
                 pizzaWordsList[index] = PizzaList.ElementAt(index).Name;
             }
 
-            pizzaWordsList[PizzaList.Count] = "Badziebadla";
-
             // MICROSOFT SPEECH PLATFORM
             try
             {
                 Sre.SetInputToDefaultAudioDevice();
                 Sre.SpeechRecognized += new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
-                Sre.RecognizeCompleted += new EventHandler<RecognizeCompletedEventArgs>(Sre_RecognizeCompleted);
 
                 Choices words = new Choices(pizzaWordsList);
                 GrammarBuilder gramBuild = new GrammarBuilder();
@@ -108,10 +103,15 @@ namespace PizzaOrder
 
         private void Btn_Click(object sender, RoutedEventArgs e)
         {
+
+            Sre.RecognizeAsyncStop();
+            Sre.UnloadAllGrammars();
+            Sre.SpeechRecognized -= new EventHandler<SpeechRecognizedEventArgs>(Sre_SpeechRecognized);
+
             Button btn = (Button)sender;
-            Pizza pizza = new Pizza();
-            pizza = (Pizza)btn.Tag;
-            OrderList.Add(pizza);
+            Pizza pizza = new Pizza((Pizza)btn.Tag);
+
+            HomePage.OrderList.Add(pizza);
 
             ChooseSize chooseSizePage = new ChooseSize();
             NavigationService nav = NavigationService.GetNavigationService(this);
@@ -119,16 +119,9 @@ namespace PizzaOrder
         }
 
         // MICROSOFT SPEECH PLATFORM
-        private static void Sre_SpeechRecognized(object sender,
-            SpeechRecognizedEventArgs e)
+        private void Sre_SpeechRecognized(object sender, SpeechRecognizedEventArgs e)
         {
-            if (e.Result.Text == "Badziebadla")
-            {
-                ((SpeechRecognitionEngine)sender).RecognizeAsyncCancel();
-                Console.WriteLine("Badziebadla");
-                return;
-            }
-            if (e.Result.Confidence >= 0.75)
+            if (e.Result.Confidence >= 0.70)
             { 
                 Console.WriteLine("I heard " + e.Result.Text);
 
@@ -136,21 +129,14 @@ namespace PizzaOrder
                 {
                     if (button.Content.ToString() == e.Result.Text)
                     {
-                        ((SpeechRecognitionEngine)sender).RecognizeAsyncCancel();
-                        button.RaiseEvent(new RoutedEventArgs(ButtonBase.ClickEvent));
+                        Btn_Click(button, new RoutedEventArgs());
+                        break;
                     }
                 }
             }
             else
-                Console.WriteLine("Unknown word, try again");
-        }
-
-        private static void Sre_RecognizeCompleted(object sender,
-            RecognizeCompletedEventArgs e)
-        {
-            return;
+                Console.WriteLine("Unknown word: " + e.Result.Text + ", Confidence: " + e.Result.Confidence);
         }
         // MICROSOFT SPEECH PLATFORM
-
     } //class
 } //ns
